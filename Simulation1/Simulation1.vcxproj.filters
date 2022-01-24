@@ -21,5 +21,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Simulation1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
