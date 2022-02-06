@@ -12,30 +12,30 @@ using namespace Eigen;
 using vec2 = Vector2d;
 
 
-constexpr int       PLY          = 3;						         // 线层数
-constexpr int       LEN          = 18;							     // 线长度
-constexpr int       N            = (2 * PLY + 1) * LEN;		         // 粒子总数
-constexpr double    DT           = 0.01;						     // 时间步长
-constexpr double    CUT_ENE      = -0.016316891136;                  // 截断能量
-constexpr int       N_STEP       = 50000;				             // 时间步数
-constexpr int       LOG_RANGE    = 1000;				             // 记录步长
-const     double    S            = pow(2, 1 / 6);			         // 平衡距离
-const     double    BOX_LEN      = (LEN + 0.5) * S;			         // 盒子长度
-const     double    BOX_WID      = sqrt(3) * (10 + PLY) * S;		 // 盒子宽度
-const     double    BOX_HALF_WID = BOX_WID / 2.;		             // 盒子半宽度
-const	  double    CUT_DIS      = 2.5 * S;						     // 截断距离
+constexpr int    PLY     = 3;                        // 线层数
+constexpr int    LEN     = 18;                       // 线长度
+constexpr int    N       = (2 * PLY + 1) * LEN;      // 粒子总数
+constexpr double DT      = 0.01;                     // 时间步长
+constexpr double CUT_ENE = -0.016316891136;          // 截断能量
+constexpr int    NUM_STP = 50000;                    // 时间步数
+constexpr int    LOG_RNG = 1000;                     // 记录步长
+const     double S       = pow(2, 1 / 6);            // 平衡距离
+const     double BOX_LEN = (LEN + 0.5) * S;          // 盒子长度
+const     double BOX_WID = sqrt(3) * (10 + PLY) * S; // 盒子宽度
+const     double BOX_HWI = BOX_WID / 2.;             // 盒子半宽度
+const	  double CUT_DIS = 2.5 * S;                  // 截断距离
 
 
-double tmp   = 0.9;				// 温度
-double ke    = 0;		        // 热能
-double pe    = 0;				// 势能
+double tmp   = 0.9; // 温度
+double ke    = 0;   // 热能
+double pe    = 0;   // 势能
 double gamma = 1.0;
 double tmp1  = sqrt(2.0 * gamma * tmp / DT);
 double tmp2  = 1.0 + tmp / 2. * gamma;
-vec2   f[N];	                // 每个分子的受力
-vec2   v[N];	                // 每个分子的速度
-vec2   x[N];	                // 当前时刻粒子位置
-vec2   xm[N];	                // 上个时刻粒子位置
+vec2   f[N];        // 每个分子的受力
+vec2   v[N];        // 每个分子的速度
+vec2   x[N];        // 当前时刻粒子位置
+vec2   xm[N];       // 上个时刻粒子位置
 
 
 static default_random_engine e(time(0));
@@ -83,7 +83,7 @@ void init()
 			int k = i * LEN + j;
 			x[k] = vec2(
 				(double)j * S + 0.5,
-				0.5 * sqrt(3) * i * S + 0.5 + BOX_HALF_WID
+				0.5 * sqrt(3) * i * S + 0.5 + BOX_HWI
 			);
 			xm[k] = x[k] - v[k] * DT;
 		}
@@ -127,8 +127,8 @@ void force() {
 
 
 void integrate() {
-	gamma = 0;        // 控温参数
-	vec2 vh[N];	      // 半步速度
+	gamma = 0;  // 控温参数
+	vec2 vh[N]; // 半步速度
 
 	// 更新半步速度和位置
 	for (size_t i = 0; i < N; i++)
@@ -168,7 +168,7 @@ void print_log(int iter) {
 	ofstream os;
 	os.open("position.txt", std::ios_base::app);
 	os << "Iter " << iter << endl;
-	for (size_t i = 0; i < N; i++) { 
+	for (size_t i = 0; i < N; i++) {
 		os << i << "," << x[i].x() << "," << x[i].y() << endl;
 	}
 	os.close();
@@ -186,14 +186,14 @@ int main() {
 	init();
 	print_log(0);
 	start = clock();
-	while (n <= N_STEP)
+	while (n <= NUM_STP)
 	{
 		force();
 		integrate();
-		if (n % LOG_RANGE == 0) {
+		if (n % LOG_RNG == 0) {
 			tick = clock();
 			cout << (double)(tick - start) / CLOCKS_PER_SEC << "\t"
-				<< n - LOG_RANGE << " to " << n << endl;
+				<< n - LOG_RNG << " to " << n << endl;
 			start = tick;
 			print_log(n);
 		}
