@@ -150,9 +150,6 @@
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Simulation1.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\OpenBLAS.0.2.14.1\build\native\openblas.targets" Condition="Exists('..\packages\OpenBLAS.0.2.14.1\build\native\openblas.targets')" />
