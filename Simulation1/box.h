@@ -1,15 +1,15 @@
 #pragma once
-#include "param.h"
+#include "Param.h"
 
-class box
+class Box
 {
 public:
 	double x, y, z;
-	box(double x, double y) :x(x), y(y), z(0) {};
-	box(double x, double y, double z) :x(x), y(y), z(z) {};
-	void pbc_restrict(vec2&);
-	void pbc_restrict(vec3&);
-	void pbc_mic(vec2&);
-	void pbc_mic(vec3&);
+	Box(double x, double y) :x(x), y(y), z(0) {};
+	Box(double x, double y, double z) :x(x), y(y), z(z) {};
+	void restrictPositionPBC(vec2&);
+	void restrictPositionPBC(vec3&);
+	void restrictForcePBC(vec2&);
+	void restrictForcePBC(vec3&);
 };
 

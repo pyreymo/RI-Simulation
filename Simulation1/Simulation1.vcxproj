@@ -143,10 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="box.cpp" />
-    <ClCompile Include="force.cpp" />
-    <ClCompile Include="particle.cpp" />
-    <ClCompile Include="simulation.cpp" />
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="Force.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Simulation1.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -154,11 +154,10 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="box.h" />
-    <ClInclude Include="force.h" />
-    <ClInclude Include="param.h" />
-    <ClInclude Include="particle.h" />
-    <ClInclude Include="simulation.h" />
+    <ClInclude Include="Box.h" />
+    <ClInclude Include="Force.h" />
+    <ClInclude Include="Param.h" />
+    <ClInclude Include="Particle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

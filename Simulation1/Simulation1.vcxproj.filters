@@ -18,16 +18,16 @@
     <ClCompile Include="Simulation1.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="box.cpp">
+    <ClCompile Include="Box.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="particle.cpp">
+    <ClCompile Include="Particle.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="force.cpp">
+    <ClCompile Include="Force.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="simulation.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -36,19 +36,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="box.h">
+    <ClInclude Include="Box.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="particle.h">
+    <ClInclude Include="Particle.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="force.h">
+    <ClInclude Include="Force.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="simulation.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="param.h">
+    <ClInclude Include="Param.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

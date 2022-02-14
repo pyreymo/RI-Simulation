@@ -1,24 +1,29 @@
-#include "particle.h"
-#include "box.h"
-#include "force.h"
+#include "Particle.h"
+#include "Box.h"
+#include "Force.h"
 
-void particle::init(vector<vec2>& x, vector<vec2>& xm, vector<vec2>& v)
+void Particle::init(vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, Box box)
 {
-	// 初始化速度
-	double ke = 0;
+	double totalV2 = 0;
 	vec2 sum(0, 0);
+
+	v.resize(N);
+	x.resize(N);
+	f.resize(N);
 	for (size_t i = 0; i < N; i++)
 	{
 		v[i] = vec2(crand(), crand());
 		sum += v[i];
 	}
+
 	vec2 del = sum / ((double)N);
 	for (size_t i = 0; i < N; i++)
 	{
 		v[i] -= del;
-		ke += v[i].squaredNorm();
+		totalV2 += v[i].squaredNorm();
 	}
-	double factor_scale = sqrt(2. * N * TEMP / ke); // 温度标定因子
+
+	double factor_scale = sqrt(2. * N * TEMP / totalV2); // 温度标定因子
 	for (size_t i = 0; i < N; i++) v[i] *= factor_scale;
 
 	// 初始化晶胞
@@ -28,42 +33,36 @@ void particle::init(vector<vec2>& x, vector<vec2>& xm, vector<vec2>& v)
 		{
 			int k = i * LEN + j;
 			x[k] = vec2(
-				(double)j * S + 0.5,
-				0.5 * sqrt(3) * (i + 0.5) * S + BOX_HALF_Y
+				(double)(j + 0.5) * S + (i % 2) * 0.5 * S,
+				0.5 * sqrt(3) * (i - PLY) * S + BOX_HALF_Y
 			);
-			xm[k] = x[k] - v[k] * DT;
 		}
 	}
 }
 
-double particle::velocity_verlet(vector<vec2>& x, vector<vec2>& xm, vector<vec2>& v, vector<vec2>& f)
+void Particle::update(vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, Force force, Box box, double& totalV2)
 {
-	double ke = 0;
+	totalV2 = 0;
+	vec2 vh[N]; // 半步速度
 
-	force forceObj = force();
-	box boxObj = box(BOX_X, BOX_Y);
+	// 更新半步速度和位置
+	for (size_t i = 0; i < N; i++)
+	{
+		vh[i] = v[i] + HALF_DT * (f[i] - v[i]);
+		x[i] += vh[i] * DT;
+		box.restrictPositionPBC(x[i]);
+	}
+
+	force.update(x, f, box);
 
 	for (size_t i = 0; i < N; i++)
 	{
-		x[i] += DT * x[i] + DT * DT * f[i] * 0.5;
-		boxObj.pbc_restrict(x[i]);
-		v[i] += f[i] * DT * 0.5;
-		forceObj.cell_list();
+		f[i] += sigma * vec2(NORM_DIST(RAND_ENGINE), NORM_DIST(RAND_ENGINE));
+		v[i] = coef1 * (vh[i] + HALF_DT * f[i]);
+		totalV2 += v[i].squaredNorm();
 	}
-
-	// TODO 刷新一次force
-
-	for (size_t i = 0; i < N; i++)
-	{
-		v[i] += f[i] * DT * 0.5;
-		ke += v[i].squaredNorm();
-	}
-
-	return ke;
-
-
 }
 
-double particle::crand() {
+double Particle::crand() {
 	return ((double)rand() / (RAND_MAX)) - 0.5;
 }
