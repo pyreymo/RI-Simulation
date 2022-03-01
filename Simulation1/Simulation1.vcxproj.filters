@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Simulation1.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Box.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -28,6 +25,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Logline.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Sample.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -46,6 +49,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Param.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Logline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Sample.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

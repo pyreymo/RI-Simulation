@@ -1,157 +1,122 @@
 #include <iostream>
 #include <iomanip>
-#include <vector>
-#include <fstream>
 #include <ctime>
+#include <map>
 #include "Particle.h"
+#include "Logline.h"
+#include "Sample.h"
 #include "Box.h"
 #include "Force.h"
 #include "Param.h"
 
 using namespace std;
 
-void print_log_2d(string LOG_ADDR, int iter, vector<vec2> x) {
-	ofstream os;
-	os.open(LOG_ADDR, std::ios_base::app);
-	os << "Iter " << iter << endl;
-	for (size_t i = 0; i < N; i++) {
-		os << i << "," << x[i].x() << "," << x[i].y() << endl;
-	}
-	os.close();
-}
-
-void init_log_2d(string LOG_ADDR, vector<vec2> x) {
-	ofstream os;
-	os.open(LOG_ADDR, std::ios_base::out);
-	os << "# 层数\t" << PLY << endl;
-	os << "# 长度\t" << LEN << endl;
-	os << "# dt\t" << DT << endl;
-	os << "# 迭代次数\t" << N_STEP << endl;
-	os << "# 记录步长\t" << LOG_STEP << endl;
-	os << "# 温度\t" << TEMP << endl;
-	os << "# 截断距离\t" << TRUNC_DIST << endl;
-	os << "# BOX_X\t" << BOX_X << endl;
-	os << "# BOX_Y\t" << BOX_Y << endl;
-	os << "Iter 1" << endl;
-	for (size_t i = 0; i < N; i++) {
-		os << i << "," << x[i].x() << "," << x[i].y() << endl;
-	}
-	os.close();
-}
-
+#ifdef TWO_DIMENSIONAL_SIMULATION
 void simulation_2d() {
 	clock_t start = clock(), tick;
 
-	int n = 0;
-	double totalV2;
-	vector<vec2> x, v, f;
-
+	// Define simulation environment
 	Particle particle;
-	Box box(BOX_X, BOX_Y);
 	Force force;
+	Box box(BOX_X, BOX_Y);
+	Logline logline;
+	Sample sample;
 
-	particle.init_2d(x, v, f, box);
-	string LOG_ADDR = "2D_" + to_string(PLY) + "x" + to_string(LEN) + "_temp_" + to_string(TEMP)
-		+ "_iter_" + to_string(N_STEP) + ".txt";
-	init_log_2d(LOG_ADDR, x);
-	cout << "用时\t进度\t温度" << setprecision(4) << endl;
-	while (++n <= N_STEP)
+	vector<vec2> x0, x, v, f;
+	double totalVelocitySquare;
+	map<string, double> params;
+	const string LOG_ADDR = "Output/2D_" + to_string(PLY) + "x" + to_string(LEN) + "_temp_" + to_string(TEMP)
+		+ "_iter_" + to_string(ITER_NUM) + ".txt";
+
+	particle.init_2d(x0, x, v, f, box);
+	logline.init_log_2d(LOG_ADDR, x, params);
+
+	cout << "Calc.\tProg.\tTemp." << setprecision(4) << endl;
+
+	int iter = 0;
+	while (++iter <= ITER_NUM)
 	{
+		// Update x, v, f every time step
 		force.update_2d(x, f, box);
-		particle.update_2d(x, v, f, force, box, totalV2);
+		particle.update_2d(x, v, f, force, box, totalVelocitySquare);
 
-		if (n % 10 == 0) {
-			particle.rescale_2d(v);
-		}
+		// Rescale every RESCALE time steps
+		if (iter % RESCALE == 0) { particle.rescale_2d(v); }
 
-		if (n % LOG_STEP == 0) {
+		// Output and sample parameters every LOG_STEP time steps
+		if (iter % LOG_STEP == 0)
+		{
+			// Output the current calculation progress and status to the console
 			tick = clock();
-			cout << (double)(tick - start) / CLOCKS_PER_SEC << "\t"
-				<< ((double)n / N_STEP) * 100 << "%\t"
-				<< totalV2 / (2. * (N - 1.)) << endl;
+			cout << (double)(tick - start) / CLOCKS_PER_SEC << "s\t" << ((double)iter / ITER_NUM) * 100 << "%\t"
+				<< totalVelocitySquare / (2. * (N - 1.)) << endl;
 			start = tick;
 
-			print_log_2d(LOG_ADDR, n, x);
+			// Sample some parameters
+			sample.msd_2d(x0, x, params);
+
+			// Output the sampled parameters to a log file
+			logline.print_log_2d(LOG_ADDR, iter, x, params);
 		}
 	}
 };
-
-
-void print_log_3d(string LOG_ADDR, int iter, vector<vec3> x) {
-	ofstream os;
-	os.open(LOG_ADDR, std::ios_base::app);
-	os << "Iter " << iter << endl;
-	for (size_t i = 0; i < N; i++) {
-		os << i << "," << x[i].x() << "," << x[i].y() << "," << x[i].z() << endl;
-	}
-	os.close();
-}
-
-void init_log_3d(string LOG_ADDR, vector<vec3> x) {
-	ofstream os;
-	os.open(LOG_ADDR, std::ios_base::out);
-	os << "# 层数\t" << PLY << endl;
-	os << "# 长度\t" << LEN << endl;
-	os << "# dt\t" << DT << endl;
-	os << "# 迭代次数\t" << N_STEP << endl;
-	os << "# 记录步长\t" << LOG_STEP << endl;
-	os << "# 温度\t" << TEMP << endl;
-	os << "# 截断距离\t" << TRUNC_DIST << endl;
-	os << "# BOX_X\t" << BOX_X << endl;
-	os << "# BOX_Y\t" << BOX_Y << endl;
-	os << "# BOX_Z\t" << BOX_Z << endl;
-	os << "Iter 1" << endl;
-	for (size_t i = 0; i < N; i++) {
-		os << i << "," << x[i].x() << "," << x[i].y() << "," << x[i].z() << endl;
-	}
-	os.close();
-}
-
+#else
 void simulation_3d() {
 	clock_t start = clock(), tick;
 
-	int n = 0;
-	double totalV2;
-	vector<vec3> x, v, f;
-
+	// Define simulation environment
 	Particle particle;
-	Box box(BOX_X, BOX_Y, BOX_Z);
 	Force force;
+	Box box(BOX_X, BOX_Y, BOX_Z);
+	Logline logline;
+	Sample sample;
 
-	particle.init_3d(x, v, f, box);
-	string LOG_ADDR = "3D_" + to_string(PLY) + "x" + to_string(LEN) + "x" + to_string(LEN)
-		+ "_temp_" + to_string(TEMP)
-		+ "_iter_" + to_string(N_STEP) + ".txt";
-	init_log_3d(LOG_ADDR, x);
-	cout << "用时\t进度\t温度" << setprecision(4) << endl;
-	while (++n <= N_STEP)
+	vector<vec3> x0, x, v, f;
+	double totalVelocitySquare;
+	map<string, double> params;
+	const string LOG_ADDR = "Output/3D_" + to_string(PLY) + "x" + to_string(LEN) + "x" + to_string(LEN)
+		+ "_temp_" + to_string(TEMP) + "_iter_" + to_string(ITER_NUM) + ".txt";
+
+	particle.init_3d(x0, x, v, f, box);
+	logline.init_log_3d(LOG_ADDR, x, params);
+
+	cout << "Calc.\tProg.\tTemp." << setprecision(4) << endl;
+
+	int iter = 0;
+	while (++iter <= ITER_NUM)
 	{
+		// Update x, v, f every time step
 		force.update_3d(x, f, box);
-		particle.update_3d(x, v, f, force, box, totalV2);
+		particle.update_3d(x, v, f, force, box, totalVelocitySquare);
 
-		if (n % 10 == 0) {
-			particle.rescale_3d(v);
-		}
+		// Rescale every 10 time steps
+		if (iter % RESCALE == 0) { particle.rescale_3d(v); }
 
-		if (n % LOG_STEP == 0) {
+		// Output and sample parameters every LOG_STEP time steps
+		if (iter % LOG_STEP == 0)
+		{
+			// Output the current calculation progress and status to the console
 			tick = clock();
-			cout << (double)(tick - start) / CLOCKS_PER_SEC << "\t"
-				<< ((double)n / N_STEP) * 100 << "%\t"
-				<< totalV2 / (3. * (N - 1.)) << endl;
+			cout << (double)(tick - start) / CLOCKS_PER_SEC << "s\t" << ((double)iter / ITER_NUM) * 100 << "%\t"
+				<< totalVelocitySquare / (3. * (N - 1.)) << endl;
 			start = tick;
 
-			print_log_3d(LOG_ADDR, n, x);
+			// Sample some parameters
+			sample.msd_3d(x0, x, params);
+
+			// Output the sampled parameters to a log file
+			logline.print_log_3d(LOG_ADDR, iter, x, params);
 		}
 	}
 };
+#endif
 
-void debug() {
-
-}
 
 int main() {
+#ifdef TWO_DIMENSIONAL_SIMULATION
 	simulation_2d();
-	//simulation_3d();
-	//debug();
+#else
+	simulation_3d();
+#endif
 	return 0;
 }

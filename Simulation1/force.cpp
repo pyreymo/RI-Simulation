@@ -4,6 +4,7 @@
 #include "Box.h"
 #include <iostream>
 
+#ifdef TWO_DIMENSIONAL_SIMULATION
 void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
 {
 	f.resize(N);
@@ -11,7 +12,7 @@ void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
 
 	double r2, r2i, r6i, lj;
 	array2 box_size(BOX_X, BOX_Y);                  // 盒子大小
-	array2 cell_num = round(box_size / TRUNC_DIST); // 每个轴上多少个 cell
+	array2 cell_num = round(box_size / CUTOFF); // 每个轴上多少个 cell
 	array2 cell_size = box_size / cell_num;         // 每个 cell 多大
 	int N_CELLS = cell_num.prod();                  // 一共多少个 cell
 
@@ -88,7 +89,7 @@ void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
 							r6i = r2i * r2i * r2i;
 							lj = 48 * r2i * r6i * (r6i - 0.5);
 
-							if (r2 < TRUNC_DIST_2)
+							if (r2 < CUTOFF_2)
 							{
 								vec2 temp_force = lj * dx;
 								f[i] += temp_force;
@@ -104,7 +105,7 @@ void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
 
 	}
 }
-
+#else
 void Force::update_3d(vector<vec3> x, vector<vec3>& f, Box box)
 {
 	f.resize(N);
@@ -112,7 +113,7 @@ void Force::update_3d(vector<vec3> x, vector<vec3>& f, Box box)
 
 	double r2, r6i, lj;
 	array3 box_size(BOX_X, BOX_Y, BOX_Z);           // 盒子大小
-	array3 cell_num = round(box_size / TRUNC_DIST); // 每个轴上多少个 cell
+	array3 cell_num = round(box_size / CUTOFF); // 每个轴上多少个 cell
 	array3 cell_size = box_size / cell_num;         // 每个 cell 多大
 	int N_CELLS = cell_num.prod();                  // 一共多少个 cell
 
@@ -161,7 +162,7 @@ void Force::update_3d(vector<vec3> x, vector<vec3>& f, Box box)
 			{
 				for (int cz1 = CellCoord_3d[cell].z() - 1; cz1 < CellCoord_3d[cell].z() + 2; cz1++)
 				{
-					// 利用 PBC 转换超出范围的 cell
+					// 应用周期性边界条件
 					int cx11 = cx1, cy11 = cy1, cz11 = cz1;
 					if (cx1 < 0) cx11 = cell_num.x() - 1;
 					else if (cx1 > (cell_num.x() - 1)) cx11 = 0;
@@ -191,9 +192,9 @@ void Force::update_3d(vector<vec3> x, vector<vec3>& f, Box box)
 
 								r2 = dx.squaredNorm();
 								r6i = pow(r2, -3);
-								lj = (48. / r2) * (r6i - 0.5) * r6i;	// used for derivation of energy = force
+								lj = (48. / r2) * (r6i - 0.5) * r6i;	// E'(r) = F(/vec r)/vec r
 
-								if (r2 < TRUNC_DIST_2)
+								if (r2 < CUTOFF_2)
 								{
 									vec3 temp_force = lj * dx;
 									f[i] += temp_force;
@@ -210,3 +211,4 @@ void Force::update_3d(vector<vec3> x, vector<vec3>& f, Box box)
 
 	}
 }
+#endif
