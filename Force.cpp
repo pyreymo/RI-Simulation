@@ -1,13 +1,13 @@
 #include "Force.h"
 
-void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
+void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box& box)
 {
     f.resize(N);
     for (int i = 0; i < N; i++)
         f[i] = vec2(0, 0);
 
     double r2, r2i, r6i, lj;
-    array2 box_size = array2(box.BOX_X, box.BOX_Y);
+    array2 box_size = array2(BOX_X, BOX_Y);
     array2 cell_num = round(box_size / CUTOFF);
     array2 cell_size = box_size / cell_num;
     int N_CELLS = cell_num.prod();
@@ -70,7 +70,7 @@ void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
                         if (i < j) // avoid double counting of each pair
                         {
                             vec2 dx = x[i] - x[j];
-                            box.restrictForcePBC(dx);
+                            box.restrictForce(dx);
 
                             r2 = dx.squaredNorm();
                             r2i = 1. / r2;
@@ -90,9 +90,4 @@ void Force::update_2d(vector<vec2> x, vector<vec2>& f, Box box)
             }
         }
     }
-}
-
-Force::Force(int n_plies, int n_length, double temperature, double time_step, int n_iteration, int temperature_rescale_span, int logline_span, double cutoff_distance, double pairwise_gap)
-    : Simulation(n_plies, n_length, temperature, time_step, n_iteration, temperature_rescale_span, logline_span, cutoff_distance, pairwise_gap)
-{
 }

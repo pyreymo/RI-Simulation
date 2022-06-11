@@ -1,6 +1,6 @@
 #include "Particle.h"
 
-void Particle::rescale_2d(vector<vec2>& v)
+void Particle::rescale(vector<vec2>& v)
 {
     double totalVelocitySquare = 0;
     vec2 totalVelocity(0, 0);
@@ -8,14 +8,14 @@ void Particle::rescale_2d(vector<vec2>& v)
         totalVelocity += vi;
         totalVelocitySquare += vi.squaredNorm();
     }
-    // double tempScaleFactor = sqrt((2. * TEMP) / (totalVelocitySquare / N));
-    double tempScaleFactor = sqrt(1 + TIME_STEP / BT_TAU * ((2. * TEMP) / (totalVelocitySquare / N) - 1));
+    double tempScaleFactor = sqrt((2. * TEMP) / (totalVelocitySquare / N));
+    // double tempScaleFactor = sqrt(1 + TIME_STEP / BT_TAU * ((2. * TEMP) / (totalVelocitySquare / N) - 1));
     for (vec2& vi : v) {
         vi = (vi - totalVelocity / ((double)N)) * tempScaleFactor;
     }
 }
 
-void Particle::init_2d(vector<vec2>& x0, vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, double& zeta, Box box)
+void Particle::init(vector<vec2>& x0, vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, double& zeta, Box& box)
 {
     v.resize(N);
     x.resize(N);
@@ -25,7 +25,7 @@ void Particle::init_2d(vector<vec2>& x0, vector<vec2>& x, vector<vec2>& v, vecto
     for (vec2& vi : v) {
         vi = vec2(crand(), crand());
     }
-    rescale_2d(v);
+    rescale(v);
 
     // initialize FCC-2D
     int count = 0;
@@ -33,7 +33,7 @@ void Particle::init_2d(vector<vec2>& x0, vector<vec2>& x, vector<vec2>& v, vecto
         for (int i = 0; i < LEN; i++) {
             x[count++] = vec2(
                 (double)(i + (j % 2) / 2. + 0.5) * GAP * S,
-                (j - (PLY - 1) / 2.) * sqrt(3) / 2. * GAP * S + box.BOX_HALF_Y);
+                (j - (PLY - 1) / 2.) * sqrt(3) / 2. * GAP * S + BOX_HALF_Y);
         }
     }
 
@@ -43,36 +43,15 @@ void Particle::init_2d(vector<vec2>& x0, vector<vec2>& x, vector<vec2>& v, vecto
 }
 
 // 解粒子运动方程
-void Particle::update_2d(vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, double& zeta, Force force, Box box, double& totalV2)
+void Particle::update(vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, double& zeta, Force& force, Box& box, double& totalV2)
 {
-    /*
-    * B 方法
-    totalV2 = 0;
-
-    for (size_t i = 0; i < N; i++)
-    {
-            x[i] += TIME_STEP * v[i] + TIME_STEP * TIME_STEP * f[i] * 0.5;
-            box.restrictPositionPBC(x[i]);
-            v[i] += HALF_DT * f[i];
-    }
-
-    force.update_2d(x, f, box);
-
-    for (size_t i = 0; i < N; i++)
-    {
-            v[i] += HALF_DT * f[i];
-            totalV2 += v[i].squaredNorm();
-    }
-
-    */
-
     vector<vec2> half_v;
     half_v.assign(v.begin(), v.end());
 
     for (size_t i = 0; i < N; i++) {
         auto temp1 = HALF_DT * (f[i] - zeta * v[i]);
         x[i] += TIME_STEP * (v[i] + temp1);
-        box.restrictPositionPBC(x[i]);
+        box.restrictPosition(x[i]);
         half_v[i] += temp1;
     }
 
@@ -95,12 +74,7 @@ void Particle::update_2d(vector<vec2>& x, vector<vec2>& v, vector<vec2>& f, doub
     }
 }
 
-double Particle::crand()
+inline double Particle::crand()
 {
     return (rand() / double(RAND_MAX)) - 0.5;
-}
-
-Particle::Particle(int n_plies, int n_length, double temperature, double time_step, int n_iteration, int temperature_rescale_span, int logline_span, double cutoff_distance, double pairwise_gap)
-    : Simulation(n_plies, n_length, temperature, time_step, n_iteration, temperature_rescale_span, logline_span, cutoff_distance, pairwise_gap)
-{
 }

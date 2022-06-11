@@ -1,6 +1,6 @@
 #include "Logline.h"
 
-void Logline::print_double_params(string LOG_ADDR, int iter, vector<vec2> x, map<string, double> params)
+void Logline::print_params(string LOG_ADDR, int iter, vector<vec2> x, map<string, double> params)
 {
     ofstream os;
     os.open(LOG_ADDR, std::ios_base::app);
@@ -8,7 +8,7 @@ void Logline::print_double_params(string LOG_ADDR, int iter, vector<vec2> x, map
     for (size_t i = 0; i < N; i++) {
         os << i << "," << x[i].x() << "," << x[i].y() << endl;
     }
-    for (auto m : params) {
+    for (auto& m : params) {
         os << "@ \t" << m.first << "\t" << m.second << endl;
     }
     os.close();
@@ -20,14 +20,14 @@ void Logline::print_density(string LOG_ADDR, int iter, vector<double> density)
     os.open(LOG_ADDR, std::ios_base::app);
     os << "Iter " << iter << endl;
     os << "@DEN";
-    for (double d : density) {
+    for (double& d : density) {
         os << "\t" << d;
     }
     os << endl;
     os.close();
 }
 
-void Logline::init_log_2d(string LOG_ADDR, vector<vec2> x, map<string, double> params)
+void Logline::init(string LOG_ADDR, vector<vec2> x, map<string, double> params)
 {
     ofstream os;
     os.open(LOG_ADDR, std::ios_base::out);
@@ -51,10 +51,5 @@ void Logline::init_log_2d(string LOG_ADDR, vector<vec2> x, map<string, double> p
 
     os.close();
 
-    print_double_params(LOG_ADDR, 1, x, params);
-}
-
-Logline::Logline(int n_plies, int n_length, double temperature, double time_step, int n_iteration, int temperature_rescale_span, int logline_span, double cutoff_distance, double pairwise_gap)
-    : Simulation(n_plies, n_length, temperature, time_step, n_iteration, temperature_rescale_span, logline_span, cutoff_distance, pairwise_gap)
-{
+    print_params(LOG_ADDR, 1, x, params);
 }
