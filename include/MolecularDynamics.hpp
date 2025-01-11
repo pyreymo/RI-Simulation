@@ -1,10 +1,22 @@
 #pragma once
+
+#include <vector>
+#include <map>
 #include <Eigen/Dense>
 
-class MolecularDynamics {
+using vec2 = Eigen::Vector2d;
+
+class Particle;
+class Force;
+class Box;
+class Logline;
+class Sample;
+
+class MolecularDynamics
+{
 public:
-    void simulation();
     MolecularDynamics(int n_plies, int n_length, double temperature, double dt, int n_iteration, int log_every, double cutoff_distance, double density_param);
+    void simulation();
 
 protected:
     int PLY;
@@ -20,6 +32,8 @@ protected:
     double BOX_X;
     double BOX_Y;
     double BOX_HALF_Y;
-    double S = pow(2, 1 / 6.);
+    double S;
     double GAP;
+
+    // 其他可能需要的成员变量
 };
